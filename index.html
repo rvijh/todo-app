@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taskboard — To‑Do App</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: DM Serif Display + DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── Decorative background lines ── -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <main class="app">
+
+    <!-- ── Header ── -->
+    <header class="app__header">
+      <div class="header__eyebrow">Personal workspace</div>
+      <h1 class="header__title">Task<em>board</em></h1>
+      <p class="header__sub">Your thoughts, captured &amp; organised.</p>
+    </header>
+
+    <!-- ── Add Task Card ── -->
+    <section class="add-card" aria-label="Add new task">
+      <div class="add-card__inner">
+        <input
+          type="text"
+          id="taskInput"
+          class="add-card__input"
+          placeholder="What needs to be done?"
+          maxlength="280"
+          autocomplete="off"
+          aria-label="New task"
+        />
+        <button id="addBtn" class="btn btn--add" aria-label="Add task">
+          <span class="btn__label">Add</span>
+          <span class="btn__icon" aria-hidden="true">＋</span>
+        </button>
+      </div>
+      <!-- Inline error / feedback -->
+      <p id="formMsg" class="add-card__msg" role="alert" aria-live="polite"></p>
+    </section>
+
+    <!-- ── Stats bar ── -->
+    <div class="stats-bar">
+      <span id="taskCount" class="stats-bar__count">0 tasks</span>
+      <span class="stats-bar__divider" aria-hidden="true">·</span>
+      <span class="stats-bar__label">all items</span>
+    </div>
+
+    <!-- ── Task List ── -->
+    <section class="list-section" aria-label="Task list">
+
+      <!-- Loading skeleton -->
+      <div id="loadingState" class="state state--loading" aria-live="polite">
+        <div class="skeleton"></div>
+        <div class="skeleton skeleton--short"></div>
+        <div class="skeleton"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="state state--empty" hidden>
+        <div class="empty__icon" aria-hidden="true">✦</div>
+        <p class="empty__text">No tasks yet.<br/>Add one above to get started.</p>
+      </div>
+
+      <!-- Actual list -->
+      <ul id="todoList" class="todo-list" role="list" hidden></ul>
+
+    </section>
+
+  </main>
+
+  <!-- ── Edit Modal ── -->
+  <div id="editModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal__backdrop"></div>
+    <div class="modal__box">
+      <h2 id="modalTitle" class="modal__title">Edit task</h2>
+      <input
+        type="text"
+        id="editInput"
+        class="modal__input"
+        maxlength="280"
+        aria-label="Edit task text"
+      />
+      <p id="editMsg" class="modal__msg" role="alert" aria-live="polite"></p>
+      <div class="modal__actions">
+        <button id="cancelEditBtn" class="btn btn--ghost">Cancel</button>
+        <button id="saveEditBtn" class="btn btn--save">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast notification ── -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+/* ────────────────────────────────────────────────
+   Taskboard — style.css
+   Aesthetic: Refined dark editorial / typographic
+   ──────────────────────────────────────────────── */
+
+/* ── Reset & custom properties ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:        #0e0e0e;
+  --ink-mid:    #1a1a1a;
+  --ink-soft:   #2c2c2c;
+  --paper:      #f5f0e8;
+  --paper-dark: #ede7d9;
+  --cream:      #faf7f2;
+  --gold:       #c9a84c;
+  --gold-light: #e8c97a;
+  --red:        #c0392b;
+  --red-light:  #e74c3c;
+  --muted:      #888074;
+  --border:     rgba(14,14,14,.12);
+  --border-md:  rgba(14,14,14,.20);
+
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-mono:    'DM Mono', 'Courier New', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-card: 0 2px 12px rgba(14,14,14,.08), 0 1px 3px rgba(14,14,14,.06);
+  --shadow-raise: 0 8px 32px rgba(14,14,14,.14), 0 2px 8px rgba(14,14,14,.08);
+  --shadow-modal: 0 20px 60px rgba(14,14,14,.30), 0 4px 16px rgba(14,14,14,.18);
+
+  --transition: .18s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Base ── */
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Background grid ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 20%, black 40%, transparent 100%);
+}
+
+/* ── App container ── */
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 6rem;
+}
+
+/* ── Header ── */
+.app__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header__eyebrow {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .75rem;
+}
+
+.header__title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: .6rem;
+  letter-spacing: -.02em;
+}
+
+.header__title em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.header__sub {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+/* ── Add card ── */
+.add-card {
+  background: var(--cream);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition);
+}
+
+.add-card:focus-within {
+  box-shadow: var(--shadow-raise);
+  border-color: var(--gold);
+}
+
+.add-card__inner {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+}
+
+.add-card__input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: .92rem;
+  font-weight: 400;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  padding: .5rem .25rem;
+  caret-color: var(--gold);
+}
+
+.add-card__input::placeholder { color: var(--muted); }
+
+.add-card__msg {
+  font-size: .75rem;
+  margin-top: .6rem;
+  padding-left: .25rem;
+  min-height: 1rem;
+  color: var(--red);
+  font-weight: 500;
+  transition: opacity var(--transition);
+}
+
+/* ── Buttons ── */
+.btn {
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  letter-spacing: .04em;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .55rem 1.1rem;
+  transition: background var(--transition), transform var(--transition), opacity var(--transition);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn:active { transform: scale(.96); }
+.btn:disabled { opacity: .45; cursor: not-allowed; pointer-events: none; }
+
+.btn--add {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+.btn--add:hover { background: var(--ink-soft); }
+
+.btn__icon { font-size: 1.1rem; line-height: 1; }
+
+.btn--edit {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border-md);
+  padding: .4rem .75rem;
+  font-size: .75rem;
+}
+.btn--edit:hover { background: var(--paper-dark); color: var(--ink); border-color: var(--ink-soft); }
+
+.btn--delete {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border-md);
+  padding: .4rem .75rem;
+  font-size: .75rem;
+}
+.btn--delete:hover { background: #fdf0ef; color: var(--red-light); border-color: var(--red-light); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border-md);
+}
+.btn--ghost:hover { background: var(--paper-dark); color: var(--ink); }
+
+.btn--save {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn--save:hover { background: var(--ink-soft); }
+
+/* ── Stats bar ── */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .72rem;
+  color: var(--muted);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding-left: .25rem;
+}
+
+.stats-bar__count { font-weight: 500; color: var(--ink); }
+.stats-bar__divider { opacity: .4; }
+
+/* ── State containers ── */
+.state { text-align: center; padding: 3rem 1rem; }
+
+/* Loading skeletons */
+.skeleton {
+  height: 64px;
+  background: linear-gradient(90deg, var(--paper-dark) 25%, var(--cream) 50%, var(--paper-dark) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-md);
+  margin-bottom: .75rem;
+}
+.skeleton--short { height: 64px; width: 60%; margin: 0 auto .75rem; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Empty state */
+.empty__icon {
+  font-size: 2.5rem;
+  color: var(--gold-light);
+  margin-bottom: 1rem;
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: .6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+.empty__text {
+  font-size: .88rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+/* ── Todo list ── */
+.todo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+/* ── Todo item ── */
+.todo-item {
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+  animation: slideIn .22s cubic-bezier(.4,0,.2,1) both;
+}
+
+.todo-item:hover {
+  box-shadow: var(--shadow-raise);
+  transform: translateY(-1px);
+  border-color: var(--border-md);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.todo-item.removing {
+  animation: slideOut .2s cubic-bezier(.4,0,.2,1) forwards;
+}
+
+@keyframes slideOut {
+  to { opacity: 0; transform: translateX(20px) scale(.97); }
+}
+
+/* Index badge */
+.todo-item__index {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 500;
+  color: var(--muted);
+  min-width: 1.8rem;
+  text-align: right;
+  flex-shrink: 0;
+  opacity: .5;
+}
+
+/* Task text */
+.todo-item__text {
+  flex: 1;
+  font-size: .9rem;
+  font-weight: 400;
+  line-height: 1.5;
+  word-break: break-word;
+  color: var(--ink);
+}
+
+/* Actions */
+.todo-item__actions {
+  display: flex;
+  gap: .4rem;
+  flex-shrink: 0;
+}
+
+/* ── Edit Modal ── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal[hidden] { display: none; }
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(14,14,14,.45);
+  backdrop-filter: blur(4px);
+  animation: fadeIn .18s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal__box {
+  position: relative;
+  background: var(--cream);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-modal);
+  animation: popIn .2s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.modal__title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  margin-bottom: 1.25rem;
+  color: var(--ink);
+}
+
+.modal__input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: .9rem;
+  background: var(--paper);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  padding: .75rem 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--transition);
+  caret-color: var(--gold);
+}
+
+.modal__input:focus { border-color: var(--gold); }
+
+.modal__msg {
+  font-size: .75rem;
+  color: var(--red);
+  margin-top: .5rem;
+  min-height: 1rem;
+  font-weight: 500;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .6rem;
+  margin-top: 1.5rem;
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(calc(100% + 2rem));
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  font-weight: 500;
+  padding: .65rem 1.4rem;
+  border-radius: 100px;
+  box-shadow: var(--shadow-raise);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 200;
+  transition: transform .25s cubic-bezier(.4,0,.2,1), opacity .25s;
+  opacity: 0;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+  .app { padding: 2.5rem 1rem 5rem; }
+
+  .header__title { font-size: 3rem; }
+
+  .todo-item { padding: .85rem .9rem; gap: .75rem; }
+
+  .btn--edit,
+  .btn--delete { padding: .35rem .6rem; font-size: .72rem; }
+
+  .modal__box { padding: 1.5rem; }
+}
