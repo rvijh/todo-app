@@ -3,99 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Taskboard — To‑Do App</title>
+  <title>Tasks — Get things done</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Google Fonts: DM Serif Display + DM Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- ── Decorative background lines ── -->
-  <div class="bg-grid" aria-hidden="true"></div>
+  <!-- Ambient background blobs -->
+  <div class="bg-blob bg-blob--1" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob--2" aria-hidden="true"></div>
 
-  <main class="app">
+  <div class="layout">
 
-    <!-- ── Header ── -->
-    <header class="app__header">
-      <div class="header__eyebrow">Personal workspace</div>
-      <h1 class="header__title">Task<em>board</em></h1>
-      <p class="header__sub">Your thoughts, captured &amp; organised.</p>
-    </header>
-
-    <!-- ── Add Task Card ── -->
-    <section class="add-card" aria-label="Add new task">
-      <div class="add-card__inner">
-        <input
-          type="text"
-          id="taskInput"
-          class="add-card__input"
-          placeholder="What needs to be done?"
-          maxlength="280"
-          autocomplete="off"
-          aria-label="New task"
-        />
-        <button id="addBtn" class="btn btn--add" aria-label="Add task">
-          <span class="btn__label">Add</span>
-          <span class="btn__icon" aria-hidden="true">＋</span>
-        </button>
-      </div>
-      <!-- Inline error / feedback -->
-      <p id="formMsg" class="add-card__msg" role="alert" aria-live="polite"></p>
-    </section>
-
-    <!-- ── Stats bar ── -->
-    <div class="stats-bar">
-      <span id="taskCount" class="stats-bar__count">0 tasks</span>
-      <span class="stats-bar__divider" aria-hidden="true">·</span>
-      <span class="stats-bar__label">all items</span>
-    </div>
-
-    <!-- ── Task List ── -->
-    <section class="list-section" aria-label="Task list">
-
-      <!-- Loading skeleton -->
-      <div id="loadingState" class="state state--loading" aria-live="polite">
-        <div class="skeleton"></div>
-        <div class="skeleton skeleton--short"></div>
-        <div class="skeleton"></div>
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar__logo">
+        <span class="logo__icon">⬡</span>
+        <span class="logo__text">Tasks</span>
       </div>
 
-      <!-- Empty state -->
-      <div id="emptyState" class="state state--empty" hidden>
-        <div class="empty__icon" aria-hidden="true">✦</div>
-        <p class="empty__text">No tasks yet.<br/>Add one above to get started.</p>
+      <nav class="sidebar__nav">
+        <a href="#" class="nav-item nav-item--active">
+          <span class="nav-item__icon">▦</span>
+          <span>All Tasks</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-item__icon">◈</span>
+          <span>Today</span>
+        </a>
+        <a href="#" class="nav-item">
+          <span class="nav-item__icon">◉</span>
+          <span>Completed</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__stats">
+        <div class="stat-pill">
+          <span class="stat-pill__num" id="sidebarCount">0</span>
+          <span class="stat-pill__label">tasks</span>
+        </div>
       </div>
+    </aside>
 
-      <!-- Actual list -->
-      <ul id="todoList" class="todo-list" role="list" hidden></ul>
+    <!-- ── Main ── -->
+    <main class="main">
 
-    </section>
+      <!-- Header -->
+      <header class="main__header">
+        <div class="header__left">
+          <p class="header__date" id="currentDate"></p>
+          <h1 class="header__title">My <span class="accent">Tasks</span></h1>
+        </div>
+        <div class="header__right">
+          <div class="progress-ring-wrap" title="Task progress">
+            <svg class="progress-ring" width="52" height="52" viewBox="0 0 52 52">
+              <circle class="progress-ring__bg" cx="26" cy="26" r="20" />
+              <circle class="progress-ring__fill" id="progressCircle" cx="26" cy="26" r="20" />
+            </svg>
+            <span class="progress-ring__pct" id="progressPct">0%</span>
+          </div>
+        </div>
+      </header>
 
-  </main>
+      <!-- Add Task -->
+      <section class="add-section">
+        <div class="add-box">
+          <span class="add-box__plus" aria-hidden="true">+</span>
+          <input
+            type="text"
+            id="taskInput"
+            class="add-box__input"
+            placeholder="Add a new task..."
+            maxlength="280"
+            autocomplete="off"
+            aria-label="New task"
+          />
+          <button id="addBtn" class="add-box__btn" aria-label="Add task">
+            <span class="btn-label">Add</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <p id="formMsg" class="form-msg" role="alert" aria-live="polite"></p>
+      </section>
+
+      <!-- Task list area -->
+      <section class="tasks-section">
+
+        <!-- Column labels -->
+        <div class="tasks-header">
+          <span class="tasks-header__label">Task</span>
+          <span class="tasks-header__label tasks-header__label--right">Actions</span>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="state-container">
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row skeleton-row--md"></div>
+          <div class="skeleton-row skeleton-row--sm"></div>
+        </div>
+
+        <!-- Empty -->
+        <div id="emptyState" class="state-container state--empty" hidden>
+          <div class="empty-icon" aria-hidden="true">◎</div>
+          <p class="empty-text">No tasks yet.<br/>Start by adding one above.</p>
+        </div>
+
+        <!-- List -->
+        <ul id="todoList" class="todo-list" role="list" hidden></ul>
+
+      </section>
+
+    </main>
+  </div>
 
   <!-- ── Edit Modal ── -->
   <div id="editModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
-    <div class="modal__backdrop"></div>
-    <div class="modal__box">
-      <h2 id="modalTitle" class="modal__title">Edit task</h2>
-      <input
-        type="text"
-        id="editInput"
-        class="modal__input"
-        maxlength="280"
-        aria-label="Edit task text"
-      />
-      <p id="editMsg" class="modal__msg" role="alert" aria-live="polite"></p>
-      <div class="modal__actions">
+    <div class="modal__overlay"></div>
+    <div class="modal__panel">
+      <div class="modal__header">
+        <h2 id="modalTitle" class="modal__title">Edit Task</h2>
+        <button id="closeModalBtn" class="modal__close" aria-label="Close">✕</button>
+      </div>
+      <input type="text" id="editInput" class="modal__input" maxlength="280" aria-label="Edit task" />
+      <p id="editMsg" class="form-msg" role="alert" aria-live="polite"></p>
+      <div class="modal__footer">
         <button id="cancelEditBtn" class="btn btn--ghost">Cancel</button>
-        <button id="saveEditBtn" class="btn btn--save">Save changes</button>
+        <button id="saveEditBtn" class="btn btn--primary">Save Changes</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Toast notification ── -->
+  <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="script.js"></script>
