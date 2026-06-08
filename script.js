@@ -10,8 +10,7 @@
 
 // ── Configuration ────────────────────────────────────────────────────────────
 // Change this if your backend runs on a different host or port.
-const API_BASE = "http://127.0.0.1:8000";
-
+const API_BASE = "https://todo-app-production-554b.up.railway.app";
 // ── State ────────────────────────────────────────────────────────────────────
 let todos = [];           // Local mirror of the database rows
 let editingId = null;     // ID of the todo currently being edited
