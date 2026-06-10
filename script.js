@@ -1,39 +1,39 @@
-/**
- * script.js — Tasks App
- * Backend: Render (FastAPI) → Supabase
- */
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
   'https://dmxsltqbhlqwyjuqcsbl.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRteHNsdHFiaGxxd3lqdXFjc2JsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzQzMzAsImV4cCI6MjA5NjUxMDMzMH0.3_7YS0WlwpXHNFmtDym7urO_Edins_SvzfpuT9-6b_E'
 )
-const API_BASE = "https://todo-app-x12i.onrender.com";
 
-// ── State ────────────────────────────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────────────────
 let todos     = [];
 let editingId = null;
 
-// ── DOM refs ─────────────────────────────────────────────────────────────────
-const taskInput      = document.getElementById("taskInput");
-const addBtn         = document.getElementById("addBtn");
-const formMsg        = document.getElementById("formMsg");
-const sidebarCount   = document.getElementById("sidebarCount");
-const loadingState   = document.getElementById("loadingState");
-const emptyState     = document.getElementById("emptyState");
-const todoList       = document.getElementById("todoList");
-const editModal      = document.getElementById("editModal");
-const editInput      = document.getElementById("editInput");
-const editMsg        = document.getElementById("editMsg");
-const saveEditBtn    = document.getElementById("saveEditBtn");
-const cancelEditBtn  = document.getElementById("cancelEditBtn");
-const closeModalBtn  = document.getElementById("closeModalBtn");
-const toast          = document.getElementById("toast");
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const taskInput     = document.getElementById("taskInput");
+const addBtn        = document.getElementById("addBtn");
+const formMsg       = document.getElementById("formMsg");
+const sidebarCount  = document.getElementById("sidebarCount");
+const loadingState  = document.getElementById("loadingState");
+const emptyState    = document.getElementById("emptyState");
+const todoList      = document.getElementById("todoList");
+const editModal     = document.getElementById("editModal");
+const editInput     = document.getElementById("editInput");
+const editMsg       = document.getElementById("editMsg");
+const saveEditBtn   = document.getElementById("saveEditBtn");
+const cancelEditBtn = document.getElementById("cancelEditBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const toast         = document.getElementById("toast");
 const progressCircle = document.getElementById("progressCircle");
-const progressPct    = document.getElementById("progressPct");
-const currentDate    = document.getElementById("currentDate");
+const progressPct   = document.getElementById("progressPct");
+const currentDate   = document.getElementById("currentDate");
+const authScreen    = document.getElementById("authScreen");
+const authEmail     = document.getElementById("authEmail");
+const authBtn       = document.getElementById("authBtn");
+const authMsg       = document.getElementById("authMsg");
+const logoutBtn     = document.getElementById("logoutBtn");
 
-// ── Init date ────────────────────────────────────────────────────────────────
+// ── Date ──────────────────────────────────────────────────────────────────────
 (function setDate() {
   const now = new Date();
   currentDate.textContent = now.toLocaleDateString("en-US", {
@@ -47,14 +47,7 @@ function showToast(msg, duration = 2200) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), duration);
 }
-
 function setMsg(el, msg) { el.textContent = msg; }
-
-function setAddLoading(on) {
-  addBtn.disabled = on;
-  addBtn.querySelector(".btn-label").textContent = on ? "Adding…" : "Add";
-}
-
 function escapeHtml(str) {
   return str
     .replace(/&/g, "&amp;").replace(/</g, "&lt;")
@@ -62,105 +55,87 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ── Progress ring ─────────────────────────────────────────────────────────────
+// ── Progress ──────────────────────────────────────────────────────────────────
 function updateProgress() {
-  // For now, just show total count (no completed state yet)
-  const total = todos.length;
-  const pct   = 0; // Will be meaningful once completion is added
-  const circumference = 2 * Math.PI * 20; // r=20
-  const offset = circumference - (pct / 100) * circumference;
-  progressCircle.style.strokeDashoffset = offset;
-  progressPct.textContent = total > 0 ? `${total}` : "0";
-  sidebarCount.textContent = total;
+  const n = todos.length;
+  sidebarCount.textContent  = n;
+  progressPct.textContent   = n;
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────────
 function render() {
   loadingState.hidden = true;
   updateProgress();
-
   if (todos.length === 0) {
     emptyState.hidden = false;
     todoList.hidden   = true;
     return;
   }
-
   emptyState.hidden = true;
   todoList.hidden   = false;
-
   todoList.innerHTML = todos.map((todo, idx) => `
     <li class="todo-item" data-id="${todo.id}">
       <span class="todo-item__num">${String(idx + 1).padStart(2, "0")}</span>
       <span class="todo-item__dot"></span>
       <span class="todo-item__text">${escapeHtml(todo.task)}</span>
       <div class="todo-item__actions">
-        <button class="btn btn--edit" data-action="edit" data-id="${todo.id}" aria-label="Edit">Edit</button>
-        <button class="btn btn--delete" data-action="delete" data-id="${todo.id}" aria-label="Delete">Delete</button>
+        <button class="btn btn--edit" data-action="edit" data-id="${todo.id}">Edit</button>
+        <button class="btn btn--delete" data-action="delete" data-id="${todo.id}">Delete</button>
       </div>
     </li>
   `).join("");
 }
 
-// ── API ───────────────────────────────────────────────────────────────────────
+// ── Supabase CRUD ─────────────────────────────────────────────────────────────
 async function fetchTodos() {
-  try {
-    const res  = await fetch(`${API_BASE}/todos`);
-    if (!res.ok) throw new Error(`Server error: ${res.status}`);
-    const data = await res.json();
-    todos = data.todos || [];
-    render();
-  } catch (err) {
-    loadingState.hidden = true;
-    emptyState.hidden   = false;
-    emptyState.querySelector(".empty-text").textContent =
-      "Could not connect to server.\nIs the backend running?";
-    console.error("fetchTodos:", err);
-  }
+  const { data, error } = await supabase
+    .from("todos")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  todos = data;
+  render();
 }
 
-async function addTodo(task) {
-  const res = await fetch(`${API_BASE}/todos`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ task }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Error ${res.status}`);
-  }
-  return (await res.json()).todo;
+async function addTodoDb(task) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data, error } = await supabase
+    .from("todos")
+    .insert({ task, user_id: user.id })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
-async function updateTodo(id, task) {
-  const res = await fetch(`${API_BASE}/todos/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ task }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Error ${res.status}`);
-  }
-  return (await res.json()).todo;
+async function updateTodoDb(id, task) {
+  const { data, error } = await supabase
+    .from("todos")
+    .update({ task })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
-async function deleteTodo(id) {
-  const res = await fetch(`${API_BASE}/todos/${id}`, { method: "DELETE" });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || `Error ${res.status}`);
-  }
+async function deleteTodoDb(id) {
+  const { error } = await supabase
+    .from("todos")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }
 
-// ── Handlers ─────────────────────────────────────────────────────────────────
+// ── Handlers ──────────────────────────────────────────────────────────────────
 async function handleAdd() {
   const task = taskInput.value.trim();
   setMsg(formMsg, "");
-  if (!task) { setMsg(formMsg, "Please enter a task."); taskInput.focus(); return; }
-
-  setAddLoading(true);
+  if (!task) { setMsg(formMsg, "Please enter a task."); return; }
+  addBtn.disabled = true;
+  addBtn.querySelector(".btn-label").textContent = "Adding…";
   try {
-    const newTodo = await addTodo(task);
+    const newTodo = await addTodoDb(task);
     todos.unshift(newTodo);
     render();
     taskInput.value = "";
@@ -169,7 +144,8 @@ async function handleAdd() {
   } catch (err) {
     setMsg(formMsg, err.message || "Failed to add task.");
   } finally {
-    setAddLoading(false);
+    addBtn.disabled = false;
+    addBtn.querySelector(".btn-label").textContent = "Add";
   }
 }
 
@@ -186,7 +162,7 @@ async function handleDelete(btn, id) {
   const li = todoList.querySelector(`[data-id="${id}"]`);
   if (li) li.classList.add("removing");
   try {
-    await deleteTodo(id);
+    await deleteTodoDb(id);
     todos = todos.filter(t => t.id !== id);
     setTimeout(render, 210);
     showToast("Task deleted");
@@ -200,7 +176,7 @@ async function handleDelete(btn, id) {
 function openEditModal(id) {
   const todo = todos.find(t => t.id === id);
   if (!todo) return;
-  editingId       = id;
+  editingId = id;
   editInput.value = todo.task;
   setMsg(editMsg, "");
   editModal.hidden = false;
@@ -218,11 +194,10 @@ async function handleSaveEdit() {
   const task = editInput.value.trim();
   setMsg(editMsg, "");
   if (!task) { setMsg(editMsg, "Task cannot be empty."); return; }
-
   saveEditBtn.disabled    = true;
   saveEditBtn.textContent = "Saving…";
   try {
-    const updated = await updateTodo(editingId, task);
+    const updated = await updateTodoDb(editingId, task);
     todos = todos.map(t => (t.id === editingId ? updated : t));
     render();
     closeEditModal();
@@ -235,6 +210,41 @@ async function handleSaveEdit() {
   }
 }
 
+// ── Auth ──────────────────────────────────────────────────────────────────────
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    authScreen.classList.add("hidden");
+    fetchTodos();
+  } else {
+    authScreen.classList.remove("hidden");
+    todos = [];
+    render();
+  }
+});
+
+authBtn.addEventListener("click", async () => {
+  const email = authEmail.value.trim();
+  if (!email) { setMsg(authMsg, "Please enter your email."); return; }
+  authBtn.disabled    = true;
+  authBtn.textContent = "Sending...";
+  setMsg(authMsg, "");
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  if (error) {
+    authMsg.style.color = "var(--danger)";
+    setMsg(authMsg, error.message);
+  } else {
+    authMsg.style.color = "var(--accent)";
+    setMsg(authMsg, "✓ Magic link sent! Check your email.");
+  }
+  authBtn.disabled    = false;
+  authBtn.textContent = "Send Magic Link →";
+});
+
+logoutBtn.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+  showToast("Logged out!");
+});
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 addBtn.addEventListener("click", handleAdd);
 taskInput.addEventListener("keydown", e => { if (e.key === "Enter") handleAdd(); });
@@ -246,52 +256,4 @@ editModal.querySelector(".modal__overlay").addEventListener("click", closeEditMo
 editInput.addEventListener("keydown", e => {
   if (e.key === "Enter")  handleSaveEdit();
   if (e.key === "Escape") closeEditModal();
-});
-
-// ── Boot ─────────────────────────────────────────────────────────────────────
-fetchTodos();
-// ── Auth ─────────────────────────────────────────────────────────────────────
-const authScreen = document.getElementById("authScreen");
-const authEmail  = document.getElementById("authEmail");
-const authBtn    = document.getElementById("authBtn");
-const authMsg    = document.getElementById("authMsg");
-
-// Check if user is already logged in
-supabase.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    authScreen.classList.add("hidden");
-  }
-});
-
-// Listen for auth changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    authScreen.classList.add("hidden");
-    fetchTodos();
-  } else {
-    authScreen.classList.remove("hidden");
-  }
-});
-
-// Magic link send
-authBtn.addEventListener("click", async () => {
-  const email = authEmail.value.trim();
-  if (!email) { authMsg.textContent = "Please enter your email."; return; }
-
-  authBtn.disabled    = true;
-  authBtn.textContent = "Sending...";
-  authMsg.textContent = "";
-
-  const { error } = await supabase.auth.signInWithOtp({ email });
-
-  if (error) {
-    authMsg.style.color = "var(--danger)";
-    authMsg.textContent = error.message;
-  } else {
-    authMsg.style.color = "var(--accent)";
-    authMsg.textContent = "✓ Magic link sent! Check your email.";
-  }
-
-  authBtn.disabled    = false;
-  authBtn.textContent = "Send Magic Link →";
 });
