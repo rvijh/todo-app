@@ -2,7 +2,12 @@
  * script.js — Tasks App
  * Backend: Render (FastAPI) → Supabase
  */
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
+const supabase = createClient(
+  'https://dmxsltqbhlqwyjuqcsbl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRteHNsdHFiaGxxd3lqdXFjc2JsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzQzMzAsImV4cCI6MjA5NjUxMDMzMH0.3_7YS0WlwpXHNFmtDym7urO_Edins_SvzfpuT9-6b_E'
+)
 const API_BASE = "https://todo-app-x12i.onrender.com";
 
 // ── State ────────────────────────────────────────────────────────────────────
