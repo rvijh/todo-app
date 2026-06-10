@@ -250,3 +250,48 @@ editInput.addEventListener("keydown", e => {
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 fetchTodos();
+// ── Auth ─────────────────────────────────────────────────────────────────────
+const authScreen = document.getElementById("authScreen");
+const authEmail  = document.getElementById("authEmail");
+const authBtn    = document.getElementById("authBtn");
+const authMsg    = document.getElementById("authMsg");
+
+// Check if user is already logged in
+supabase.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    authScreen.classList.add("hidden");
+  }
+});
+
+// Listen for auth changes
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    authScreen.classList.add("hidden");
+    fetchTodos();
+  } else {
+    authScreen.classList.remove("hidden");
+  }
+});
+
+// Magic link send
+authBtn.addEventListener("click", async () => {
+  const email = authEmail.value.trim();
+  if (!email) { authMsg.textContent = "Please enter your email."; return; }
+
+  authBtn.disabled    = true;
+  authBtn.textContent = "Sending...";
+  authMsg.textContent = "";
+
+  const { error } = await supabase.auth.signInWithOtp({ email });
+
+  if (error) {
+    authMsg.style.color = "var(--danger)";
+    authMsg.textContent = error.message;
+  } else {
+    authMsg.style.color = "var(--accent)";
+    authMsg.textContent = "✓ Magic link sent! Check your email.";
+  }
+
+  authBtn.disabled    = false;
+  authBtn.textContent = "Send Magic Link →";
+});
