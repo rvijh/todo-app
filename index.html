@@ -10,6 +10,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
+  <!-- Auth Screen -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">⬡ Tasks</div>
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Enter your email to get a magic link</p>
+    <div class="auth-input-wrap">
+      <input type="email" id="authEmail" class="auth-input" placeholder="your@email.com" />
+      <button id="authBtn" class="auth-btn">Send Magic Link →</button>
+    </div>
+    <p id="authMsg" class="auth-msg"></p>
+  </div>
+</div>
 
   <!-- Ambient background blobs -->
   <div class="bg-blob bg-blob--1" aria-hidden="true"></div>
